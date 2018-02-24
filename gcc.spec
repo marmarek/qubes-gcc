@@ -208,6 +208,17 @@ Patch11: gcc6-libgo-p224.patch
 Patch12: gcc6-aarch64-async-unw-tables.patch
 Patch13: gcc6-libsanitize-aarch64-va42.patch
 
+# BTI mitigation. Backports from Debian.
+Patch100: i386-Move-struct-ix86_frame-to-machine_function.patch
+Patch101: i386-Use-reference-of-struct-ix86_frame-to-avoid-copy.patch
+Patch102: i386-Use-const-reference-of-struct-ix86_frame-to-avoi.patch
+Patch103: x86-Add-mindirect-branch.patch
+Patch104: x86-Add-mfunction-return.patch
+Patch105: x86-Add-mindirect-branch-register.patch
+Patch106: x86-Add-V-register-operand-modifier.patch
+Patch107: x86-Disallow-mindirect-branch-mfunction-return-with-m.patch
+Patch108: Use-INVALID_REGNUM-in-indirect-thunk-processing.patch
+
 # On ARM EABI systems, we do want -gnueabi to be part of the
 # target triple.
 %ifnarch %{arm}
@@ -773,6 +784,16 @@ package or when debugging this package.
 rm -f libgo/go/crypto/elliptic/p224{,_test}.go
 %patch12 -p0 -b .aarch64-async-unw-tables~
 %patch13 -p0 -b .libsanitize-aarch64-va42~
+
+%patch100 -p1
+%patch101 -p1
+%patch102 -p1
+%patch103 -p1
+%patch104 -p1
+%patch105 -p1
+%patch106 -p1
+%patch107 -p1
+%patch108 -p1
 
 %if 0%{?_enable_debug_packages}
 mkdir dwz-wrapper
