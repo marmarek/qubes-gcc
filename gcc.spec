@@ -1,3 +1,7 @@
+%if 0%{?qubes_builder}
+%define _sourcedir %(pwd)
+%endif
+
 %global DATE 20170727
 %global SVNREV 250613
 %global gcc_version 6.4.1
