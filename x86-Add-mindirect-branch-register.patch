@@ -1,7 +1,7 @@
-From b5869f4417ad2e689eab4f61015fe36b834707b3 Mon Sep 17 00:00:00 2001
-From: "H.J. Lu" <hjl.tools@gmail.com>
-Date: Sat, 6 Jan 2018 22:29:56 -0800
-Subject: [PATCH] x86: Add -mindirect-branch-register
+From 86118fbdbafe6af54b2da467e1073c49e1742116 Mon Sep 17 00:00:00 2001
+From: hjl <hjl@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 16 Jan 2018 11:17:49 +0000
+Subject: [PATCH 7/9] x86: Add -mindirect-branch-register
 
 Add -mindirect-branch-register to force indirect branch via register.
 This is implemented by disabling patterns of indirect branch via memory,
@@ -35,6 +35,7 @@ gcc/
 	(*call_value_pop): Likewise.
 	(*sibcall_pop_memory): Replace m with Bs.
 	* config/i386/i386.opt (mindirect-branch-register): New option.
+	* doc/invoke.texi: Document -mindirect-branch-register option.
 
 gcc/testsuite/
 
@@ -148,86 +149,87 @@ i386: Rewrite indirect_branch_operand logic
 
 	* config/i386/predicates.md (indirect_branch_operand): Rewrite
 	ix86_indirect_branch_register logic.
+
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/branches/gcc-7-branch@256735 138bc75d-0d04-0410-961f-82ee72b054a4
+
+[Ubuntu note: Dropped indirect-thunk-5.c, indirect-thunk-6.c,
+ indirect-thunk-bnd-3.c, indirect-thunk-bnd-4.c,
+ indirect-thunk-extern-5.c, indirect-thunk-extern-6.c,
+ indirect-thunk-inline-5.c, and indirect-thunk-inline-6.c tests due
+ to gcc 5.4 and earlier not supporting the -fno-plt option.
+	--sbeattie,]
 ---
- gcc/config/i386/constraints.md                     |  6 ++--
- gcc/config/i386/i386.md                            | 34 ++++++++++++++--------
- gcc/config/i386/i386.opt                           |  4 +++
- gcc/config/i386/predicates.md                      | 21 +++++++------
- gcc/testsuite/gcc.target/i386/indirect-thunk-1.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-2.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-3.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-4.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-5.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-6.c   |  2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-7.c   |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-1.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-2.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-3.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-4.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-5.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-6.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-attr-7.c        |  2 +-
- .../gcc.target/i386/indirect-thunk-bnd-1.c         |  2 +-
- .../gcc.target/i386/indirect-thunk-bnd-2.c         |  2 +-
- .../gcc.target/i386/indirect-thunk-bnd-3.c         |  2 +-
- .../gcc.target/i386/indirect-thunk-bnd-4.c         |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-1.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-2.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-3.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-4.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-5.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-6.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-extern-7.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-1.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-2.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-3.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-4.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-5.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-6.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-inline-7.c      |  2 +-
- .../gcc.target/i386/indirect-thunk-register-1.c    | 22 ++++++++++++++
- .../gcc.target/i386/indirect-thunk-register-2.c    | 20 +++++++++++++
- .../gcc.target/i386/indirect-thunk-register-3.c    | 19 ++++++++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-10.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-11.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-12.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-13.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-14.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-15.c       |  2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-9.c        |  2 +-
- 47 files changed, 147 insertions(+), 63 deletions(-)
+ src/gcc/config/i386/constraints.md                            |    6 +
+ src/gcc/config/i386/i386.md                                   |   34 ++++++----
+ src/gcc/config/i386/i386.opt                                  |    4 +
+ src/gcc/config/i386/predicates.md                             |    9 +-
+ src/gcc/doc/invoke.texi                                       |    7 +-
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c          |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c          |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c          |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c          |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c          |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c     |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c      |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c      |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c   |    2 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c |   22 ++++++
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c |   20 +++++
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c |   19 +++++
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-10.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-11.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-12.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-13.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-14.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-15.c              |    2 
+ src/gcc/testsuite/gcc.target/i386/ret-thunk-9.c               |    2 
+ 39 files changed, 134 insertions(+), 49 deletions(-)
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c
 
-diff --git a/gcc/config/i386/constraints.md b/src/gcc/config/i386/constraints.md
-index 1a4c701ad..9204c8e84 100644
+Index: b/gcc/config/i386/constraints.md
+===================================================================
 --- a/gcc/config/i386/constraints.md
 +++ b/gcc/config/i386/constraints.md
-@@ -172,14 +172,16 @@
+@@ -157,12 +157,14 @@
  
  (define_constraint "Bs"
    "@internal Sibcall memory operand."
--  (ior (and (not (match_test "TARGET_X32"))
-+  (ior (and (not (match_test "ix86_indirect_branch_register"))
-+	    (not (match_test "TARGET_X32"))
- 	    (match_operand 0 "sibcall_memory_operand"))
-        (and (match_test "TARGET_X32 && Pmode == DImode")
- 	    (match_operand 0 "GOT_memory_operand"))))
+-  (and (not (match_test "TARGET_X32"))
++  (and (not (match_test "ix86_indirect_branch_register"))
++       (not (match_test "TARGET_X32"))
+        (match_operand 0 "sibcall_memory_operand")))
  
  (define_constraint "Bw"
    "@internal Call memory operand."
--  (ior (and (not (match_test "TARGET_X32"))
-+  (ior (and (not (match_test "ix86_indirect_branch_register"))
-+	    (not (match_test "TARGET_X32"))
- 	    (match_operand 0 "memory_operand"))
-        (and (match_test "TARGET_X32 && Pmode == DImode")
- 	    (match_operand 0 "GOT_memory_operand"))))
-diff --git a/gcc/config/i386/i386.md b/src/gcc/config/i386/i386.md
-index 2da671e9f..05a88fff3 100644
+-  (and (not (match_test "TARGET_X32"))
++  (and (not (match_test "ix86_indirect_branch_register"))
++       (not (match_test "TARGET_X32"))
+        (match_operand 0 "memory_operand")))
+ 
+ (define_constraint "Bz"
+Index: b/gcc/config/i386/i386.md
+===================================================================
 --- a/gcc/config/i386/i386.md
 +++ b/gcc/config/i386/i386.md
-@@ -11805,7 +11805,7 @@
+@@ -11554,7 +11554,7 @@
    [(set (pc) (match_operand 0 "indirect_branch_operand"))]
    ""
  {
@@ -236,7 +238,7 @@ index 2da671e9f..05a88fff3 100644
      operands[0] = convert_memory_address (word_mode, operands[0]);
    cfun->machine->has_local_indirect_jump = true;
  })
-@@ -11859,7 +11859,7 @@
+@@ -11607,7 +11607,7 @@
  					 OPTAB_DIRECT);
      }
  
@@ -245,7 +247,7 @@ index 2da671e9f..05a88fff3 100644
      operands[0] = convert_memory_address (word_mode, operands[0]);
    cfun->machine->has_local_indirect_jump = true;
  })
-@@ -12048,7 +12048,7 @@
+@@ -11764,7 +11764,7 @@
    [(call (mem:QI (match_operand:W 0 "memory_operand" "m"))
  	 (match_operand 1))
     (unspec [(const_int 0)] UNSPEC_PEEPSIB)]
@@ -254,7 +256,7 @@ index 2da671e9f..05a88fff3 100644
    "* return ix86_output_call_insn (insn, operands[0]);"
    [(set_attr "type" "call")])
  
-@@ -12057,7 +12057,9 @@
+@@ -11773,7 +11773,9 @@
  	(match_operand:W 1 "memory_operand"))
     (call (mem:QI (match_dup 0))
  	 (match_operand 3))]
@@ -262,10 +264,10 @@ index 2da671e9f..05a88fff3 100644
 +  "!TARGET_X32
 +   && !ix86_indirect_branch_register
 +   && SIBLING_CALL_P (peep2_next_insn (1))
-    && !reg_mentioned_p (operands[0],
- 			CALL_INSN_FUNCTION_USAGE (peep2_next_insn (1)))"
+    && peep2_reg_dead_p (2, operands[0])"
    [(parallel [(call (mem:QI (match_dup 1))
-@@ -12070,7 +12072,9 @@
+ 		    (match_dup 3))
+@@ -11785,7 +11787,9 @@
     (unspec_volatile [(const_int 0)] UNSPECV_BLOCKAGE)
     (call (mem:QI (match_dup 0))
  	 (match_operand 3))]
@@ -273,10 +275,10 @@ index 2da671e9f..05a88fff3 100644
 +  "!TARGET_X32
 +   && !ix86_indirect_branch_register
 +   && SIBLING_CALL_P (peep2_next_insn (2))
-    && !reg_mentioned_p (operands[0],
- 			CALL_INSN_FUNCTION_USAGE (peep2_next_insn (2)))"
+    && peep2_reg_dead_p (3, operands[0])"
    [(unspec_volatile [(const_int 0)] UNSPECV_BLOCKAGE)
-@@ -12092,7 +12096,7 @@
+    (parallel [(call (mem:QI (match_dup 1))
+@@ -11806,7 +11810,7 @@
  })
  
  (define_insn "*call_pop"
@@ -285,7 +287,7 @@ index 2da671e9f..05a88fff3 100644
  	 (match_operand 1))
     (set (reg:SI SP_REG)
  	(plus:SI (reg:SI SP_REG)
-@@ -12112,7 +12116,7 @@
+@@ -11826,7 +11830,7 @@
    [(set_attr "type" "call")])
  
  (define_insn "*sibcall_pop_memory"
@@ -294,7 +296,7 @@ index 2da671e9f..05a88fff3 100644
  	 (match_operand 1))
     (set (reg:SI SP_REG)
  	(plus:SI (reg:SI SP_REG)
-@@ -12166,7 +12170,9 @@
+@@ -11878,7 +11882,9 @@
    [(set (match_operand:W 0 "register_operand")
          (match_operand:W 1 "memory_operand"))
     (set (pc) (match_dup 0))]
@@ -305,7 +307,7 @@ index 2da671e9f..05a88fff3 100644
    [(set (pc) (match_dup 1))])
  
  ;; Call subroutine, returning value in operand 0
-@@ -12244,7 +12250,7 @@
+@@ -11928,7 +11934,7 @@
   	(call (mem:QI (match_operand:W 1 "memory_operand" "m"))
  	      (match_operand 2)))
     (unspec [(const_int 0)] UNSPEC_PEEPSIB)]
@@ -314,7 +316,7 @@ index 2da671e9f..05a88fff3 100644
    "* return ix86_output_call_insn (insn, operands[1]);"
    [(set_attr "type" "callv")])
  
-@@ -12254,7 +12260,9 @@
+@@ -11938,7 +11944,9 @@
     (set (match_operand 2)
     (call (mem:QI (match_dup 0))
  		 (match_operand 3)))]
@@ -322,10 +324,10 @@ index 2da671e9f..05a88fff3 100644
 +  "!TARGET_X32
 +   && !ix86_indirect_branch_register
 +   && SIBLING_CALL_P (peep2_next_insn (1))
-    && !reg_mentioned_p (operands[0],
- 			CALL_INSN_FUNCTION_USAGE (peep2_next_insn (1)))"
+    && peep2_reg_dead_p (2, operands[0])"
    [(parallel [(set (match_dup 2)
-@@ -12269,7 +12277,9 @@
+ 		   (call (mem:QI (match_dup 1))
+@@ -11952,7 +11960,9 @@
     (set (match_operand 2)
  	(call (mem:QI (match_dup 0))
  	      (match_operand 3)))]
@@ -333,10 +335,10 @@ index 2da671e9f..05a88fff3 100644
 +  "!TARGET_X32
 +   && !ix86_indirect_branch_register
 +   && SIBLING_CALL_P (peep2_next_insn (2))
-    && !reg_mentioned_p (operands[0],
- 			CALL_INSN_FUNCTION_USAGE (peep2_next_insn (2)))"
+    && peep2_reg_dead_p (3, operands[0])"
    [(unspec_volatile [(const_int 0)] UNSPECV_BLOCKAGE)
-@@ -12294,7 +12304,7 @@
+    (parallel [(set (match_dup 2)
+@@ -11976,7 +11986,7 @@
  
  (define_insn "*call_value_pop"
    [(set (match_operand 0)
@@ -345,11 +347,11 @@ index 2da671e9f..05a88fff3 100644
  	      (match_operand 2)))
     (set (reg:SI SP_REG)
  	(plus:SI (reg:SI SP_REG)
-diff --git a/gcc/config/i386/i386.opt b/src/gcc/config/i386/i386.opt
-index ad5916fb6..a97f84f68 100644
+Index: b/gcc/config/i386/i386.opt
+===================================================================
 --- a/gcc/config/i386/i386.opt
 +++ b/gcc/config/i386/i386.opt
-@@ -921,3 +921,7 @@ Enum(indirect_branch) String(thunk-inline) Value(indirect_branch_thunk_inline)
+@@ -900,3 +900,7 @@ Enum(indirect_branch) String(thunk-inlin
  
  EnumValue
  Enum(indirect_branch) String(thunk-extern) Value(indirect_branch_thunk_extern)
@@ -357,11 +359,11 @@ index ad5916fb6..a97f84f68 100644
 +mindirect-branch-register
 +Target Report Var(ix86_indirect_branch_register) Init(0)
 +Force indirect call and jump via register.
-diff --git a/gcc/config/i386/predicates.md b/src/gcc/config/i386/predicates.md
-index 93dda7bb0..d1f0a7dbf 100644
+Index: b/gcc/config/i386/predicates.md
+===================================================================
 --- a/gcc/config/i386/predicates.md
 +++ b/gcc/config/i386/predicates.md
-@@ -593,7 +593,8 @@
+@@ -607,7 +607,8 @@
  ;; Test for a valid operand for indirect branch.
  (define_predicate "indirect_branch_operand"
    (ior (match_operand 0 "register_operand")
@@ -370,40 +372,29 @@ index 93dda7bb0..d1f0a7dbf 100644
 +	    (not (match_test "TARGET_X32"))
  	    (match_operand 0 "memory_operand"))))
  
- ;; Return true if OP is a memory operands that can be used in sibcalls.
-@@ -636,20 +637,22 @@
+ ;; Test for a valid operand for a call instruction.
+@@ -616,7 +617,8 @@
    (ior (match_test "constant_call_address_operand
  		     (op, mode == VOIDmode ? mode : Pmode)")
         (match_operand 0 "call_register_no_elim_operand")
--       (ior (and (not (match_test "TARGET_X32"))
--		 (match_operand 0 "memory_operand"))
--	    (and (match_test "TARGET_X32 && Pmode == DImode")
--		 (match_operand 0 "GOT_memory_operand")))))
+-       (and (not (match_test "TARGET_X32"))
 +       (and (not (match_test "ix86_indirect_branch_register"))
-+	    (ior (and (not (match_test "TARGET_X32"))
-+		      (match_operand 0 "memory_operand"))
-+		 (and (match_test "TARGET_X32 && Pmode == DImode")
-+		      (match_operand 0 "GOT_memory_operand"))))))
++	    (not (match_test "TARGET_X32"))
+ 	    (match_operand 0 "memory_operand"))))
  
  ;; Similarly, but for tail calls, in which we cannot allow memory references.
- (define_special_predicate "sibcall_insn_operand"
+@@ -624,7 +626,8 @@
    (ior (match_test "constant_call_address_operand
  		     (op, mode == VOIDmode ? mode : Pmode)")
         (match_operand 0 "register_no_elim_operand")
--       (ior (and (not (match_test "TARGET_X32"))
--		 (match_operand 0 "sibcall_memory_operand"))
--	    (and (match_test "TARGET_X32 && Pmode == DImode")
--		 (match_operand 0 "GOT_memory_operand")))))
+-       (and (not (match_test "TARGET_X32"))
 +       (and (not (match_test "ix86_indirect_branch_register"))
-+	    (ior (and (not (match_test "TARGET_X32"))
-+		      (match_operand 0 "sibcall_memory_operand"))
-+		 (and (match_test "TARGET_X32 && Pmode == DImode")
-+		      (match_operand 0 "GOT_memory_operand"))))))
++	    (not (match_test "TARGET_X32"))
+ 	    (match_operand 0 "sibcall_memory_operand"))))
  
- ;; Return true if OP is a 32-bit GOT symbol operand.
- (define_predicate "GOT32_symbol_operand"
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
-index e365ef569..60d09881a 100644
+ ;; Match exactly zero.
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
 @@ -1,5 +1,5 @@
@@ -413,8 +404,8 @@ index e365ef569..60d09881a 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
-index 05a51ad91..aac751637 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
 @@ -1,5 +1,5 @@
@@ -424,8 +415,8 @@ index 05a51ad91..aac751637 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
-index 3c0d4c39f..9e24a3853 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
 @@ -1,5 +1,5 @@
@@ -435,8 +426,8 @@ index 3c0d4c39f..9e24a3853 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
-index 14d4ef6dd..127b5d945 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
 @@ -1,5 +1,5 @@
@@ -446,30 +437,8 @@ index 14d4ef6dd..127b5d945 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
-index b4836c38d..fcaa18d10 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
-index 1f06bd1af..e4649283d 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mno-indirect-branch-register -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
-index bc6b47a63..17c2d0faf 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
 @@ -1,5 +1,5 @@
@@ -479,8 +448,8 @@ index bc6b47a63..17c2d0faf 100644
  
  void func0 (void);
  void func1 (void);
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
-index 2257be3af..9194ccf3c 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
 @@ -1,5 +1,5 @@
@@ -490,8 +459,8 @@ index 2257be3af..9194ccf3c 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
-index e9cfdc587..e51f261a6 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
 @@ -1,5 +1,5 @@
@@ -501,8 +470,8 @@ index e9cfdc587..e51f261a6 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
-index f938db050..4aeec1833 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
 @@ -1,5 +1,5 @@
@@ -512,8 +481,8 @@ index f938db050..4aeec1833 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
-index 4e5859969..ac0e5999f 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
 @@ -1,5 +1,5 @@
@@ -523,8 +492,8 @@ index 4e5859969..ac0e5999f 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
-index b8d50249d..573cf1ef0 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
 @@ -1,5 +1,5 @@
@@ -534,8 +503,8 @@ index b8d50249d..573cf1ef0 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
-index 455adabfe..b2b37fc6e 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
 @@ -1,5 +1,5 @@
@@ -545,8 +514,8 @@ index 455adabfe..b2b37fc6e 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
-index 4595b841e..4a43e1999 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
 @@ -1,5 +1,5 @@
@@ -556,8 +525,8 @@ index 4595b841e..4a43e1999 100644
  
  void func0 (void);
  void func1 (void);
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
-index 5e3e118e9..ac84ab623 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
 @@ -1,5 +1,5 @@
@@ -567,8 +536,8 @@ index 5e3e118e9..ac84ab623 100644
  
  void (*dispatch) (char *);
  char buf[10];
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
-index 2801aa419..ce655e8be 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
 @@ -1,5 +1,5 @@
@@ -578,30 +547,8 @@ index 2801aa419..ce655e8be 100644
  
  void (*dispatch) (char *);
  char buf[10];
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
-index 70b4fb36e..d34485a00 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
--/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
- 
- void bar (char *);
- char buf[10];
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
-index 3baf03ee7..0e19830de 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
--/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mno-indirect-branch-register -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
- 
- void bar (char *);
- char buf[10];
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
-index edeb26421..579441f25 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
 @@ -1,5 +1,5 @@
@@ -611,8 +558,8 @@ index edeb26421..579441f25 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
-index 1d00413a7..c92e6f2b0 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
 @@ -1,5 +1,5 @@
@@ -622,8 +569,8 @@ index 1d00413a7..c92e6f2b0 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
-index 06ebf1c90..d9964c25b 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
 @@ -1,5 +1,5 @@
@@ -633,8 +580,8 @@ index 06ebf1c90..d9964c25b 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
-index 1c8f94466..d4dca4dc5 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
 @@ -1,5 +1,5 @@
@@ -644,30 +591,8 @@ index 1c8f94466..d4dca4dc5 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
-index 21740ac5b..5c07e02df 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
-index a77c1f470..3eb440693 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
-index 86e9fd1f1..aece93836 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
 @@ -1,5 +1,5 @@
@@ -677,8 +602,8 @@ index 86e9fd1f1..aece93836 100644
  
  void func0 (void);
  void func1 (void);
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
-index 3ecde8788..3aba5e8c8 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
 @@ -1,5 +1,5 @@
@@ -688,8 +613,8 @@ index 3ecde8788..3aba5e8c8 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
-index df32a19a2..0f0181d66 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
 @@ -1,5 +1,5 @@
@@ -699,8 +624,8 @@ index df32a19a2..0f0181d66 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
-index 9540996de..2eef6f35a 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
 @@ -1,5 +1,5 @@
@@ -710,8 +635,8 @@ index 9540996de..2eef6f35a 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
-index f3db6e244..e825a10f1 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
 @@ -1,5 +1,5 @@
@@ -721,30 +646,8 @@ index f3db6e244..e825a10f1 100644
  
  typedef void (*dispatch_t)(long offset);
  
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
-index 0f687c3b0..c6d77e103 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
-index b27c6fc96..6454827b7 100644
---- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+/* { dg-options "-O2 -mno-indirect-branch-register -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
- 
- extern void bar (void);
- 
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
-index 764a375fc..c67066cf1 100644
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
 @@ -1,5 +1,5 @@
@@ -754,9 +657,8 @@ index 764a375fc..c67066cf1 100644
  
  void func0 (void);
  void func1 (void);
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c
-new file mode 100644
-index 000000000..7d396a319
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-1.c
 @@ -0,0 +1,22 @@
@@ -782,9 +684,8 @@ index 000000000..7d396a319
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk\n" } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk_bnd\n" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c
-new file mode 100644
-index 000000000..e7e616bb2
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-2.c
 @@ -0,0 +1,20 @@
@@ -808,9 +709,8 @@ index 000000000..e7e616bb2
 +/* { dg-final { scan-assembler-not "push(?:l|q)\[ \t\]*_?dispatch"  } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c
-new file mode 100644
-index 000000000..5320e923b
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-register-3.c
 @@ -0,0 +1,19 @@
@@ -833,8 +733,8 @@ index 000000000..5320e923b
 +/* { dg-final { scan-assembler-not {\t(pause|pause|nop)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-10.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-10.c
-index 3a6727b5c..e6fea84a4 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-10.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-10.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-10.c
 @@ -1,5 +1,5 @@
@@ -844,8 +744,8 @@ index 3a6727b5c..e6fea84a4 100644
  
  extern void (*bar) (void);
  
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-11.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-11.c
-index b8f681883..e239ec454 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-11.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-11.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-11.c
 @@ -1,5 +1,5 @@
@@ -855,8 +755,8 @@ index b8f681883..e239ec454 100644
  
  extern void (*bar) (void);
  
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-12.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-12.c
-index 01b0a02f8..fa3181303 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-12.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-12.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-12.c
 @@ -1,5 +1,5 @@
@@ -866,8 +766,8 @@ index 01b0a02f8..fa3181303 100644
  
  extern void (*bar) (void);
  
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-13.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-13.c
-index 4b497b5f8..fd5b41fdd 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-13.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-13.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-13.c
 @@ -1,5 +1,5 @@
@@ -877,8 +777,8 @@ index 4b497b5f8..fd5b41fdd 100644
  
  extern void (*bar) (void);
  extern int foo (void) __attribute__ ((function_return("thunk")));
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-14.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-14.c
-index 4ae4c44a3..d606373ea 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-14.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-14.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-14.c
 @@ -1,5 +1,5 @@
@@ -888,8 +788,8 @@ index 4ae4c44a3..d606373ea 100644
  
  extern void (*bar) (void);
  
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-15.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-15.c
-index 5b5bc765a..75e45e226 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-15.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-15.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-15.c
 @@ -1,5 +1,5 @@
@@ -899,8 +799,8 @@ index 5b5bc765a..75e45e226 100644
  
  extern void (*bar) (void);
  
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-9.c b/src/gcc/testsuite/gcc.target/i386/ret-thunk-9.c
-index fa24a1f73..d1db41cc1 100644
+Index: b/gcc/testsuite/gcc.target/i386/ret-thunk-9.c
+===================================================================
 --- a/gcc/testsuite/gcc.target/i386/ret-thunk-9.c
 +++ b/gcc/testsuite/gcc.target/i386/ret-thunk-9.c
 @@ -1,5 +1,5 @@
@@ -910,6 +810,3 @@ index fa24a1f73..d1db41cc1 100644
  
  extern void (*bar) (void);
  
--- 
-2.16.1
-

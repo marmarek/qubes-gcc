@@ -1,7 +1,7 @@
-From 4d22193f5780c6ae47bc879f28fa0ec5081ea748 Mon Sep 17 00:00:00 2001
-From: "H.J. Lu" <hjl.tools@gmail.com>
-Date: Sat, 6 Jan 2018 22:29:55 -0800
-Subject: [PATCH] x86: Add -mindirect-branch=
+From c6b72be421ded17e0c156070ba6e90aa6c335ed6 Mon Sep 17 00:00:00 2001
+From: hjl <hjl@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 16 Jan 2018 10:59:42 +0000
+Subject: [PATCH 5/9] x86: Add -mindirect-branch=
 
 Add -mindirect-branch= option to convert indirect call and jump to call
 and return thunks.  The default is 'keep', which keeps indirect call and
@@ -65,8 +65,6 @@ Indirect call via register, "call reg", is converted to
 gcc/
 
 	Backport from mainline
-	2018-01-14  H.J. Lu  <hongjiu.lu@intel.com>
-
 	* config/i386/i386-opts.h (indirect_branch): New.
 	* config/i386/i386-protos.h (ix86_output_indirect_jmp): Likewise.
 	* config/i386/i386.c (ix86_using_red_zone): Disallow red-zone
@@ -105,12 +103,12 @@ gcc/
 	(thunk): Likewise.
 	(thunk-inline): Likewise.
 	(thunk-extern): Likewise.
+	* doc/extend.texi: Document indirect_branch function attribute.
+	* doc/invoke.texi: Document -mindirect-branch= option.
 
 gcc/testsuite/
 
 	Backport from mainline
-	2018-01-14  H.J. Lu  <hongjiu.lu@intel.com>
-
 	* gcc.target/i386/indirect-thunk-1.c: New test.
 	* gcc.target/i386/indirect-thunk-2.c: Likewise.
 	* gcc.target/i386/indirect-thunk-3.c: Likewise.
@@ -144,47 +142,54 @@ gcc/testsuite/
 	* gcc.target/i386/indirect-thunk-inline-5.c: Likewise.
 	* gcc.target/i386/indirect-thunk-inline-6.c: Likewise.
 	* gcc.target/i386/indirect-thunk-inline-7.c: Likewise.
+
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/branches/gcc-7-branch@256732 138bc75d-0d04-0410-961f-82ee72b054a4
+
+[UBUNTU NOTES: Updated for gcc-5.4 to include defines for
+ FIRST_INT_REG, LAST_INT_REG, and LEGACY_INT_REGNO_P as defined in
+ https://gcc.gnu.org/viewcvs/gcc?view=revision&revision=222269.
+ Dropped indirect-thunk-5.c, indirect-thunk-6.c,
+ indirect-thunk-bnd-3.c, indirect-thunk-bnd-4.c,
+ indirect-thunk-extern-5.c, indirect-thunk-extern-6.c,
+ indirect-thunk-inline-5.c, and indirect-thunk-inline-6.c tests due
+ to gcc 5.4 and earlier not supporting the -fno-plt option.
+    --sbeattie, tyhicks]
 ---
- gcc/config/i386/i386-opts.h                        |  13 +
- gcc/config/i386/i386-protos.h                      |   1 +
- gcc/config/i386/i386.c                             | 639 ++++++++++++++++++++-
- gcc/config/i386/i386.h                             |   7 +
- gcc/config/i386/i386.md                            |  26 +-
- gcc/config/i386/i386.opt                           |  20 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-1.c   |  20 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-2.c   |  20 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-3.c   |  21 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-4.c   |  21 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-5.c   |  17 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-6.c   |  18 +
- gcc/testsuite/gcc.target/i386/indirect-thunk-7.c   |  44 ++
- .../gcc.target/i386/indirect-thunk-attr-1.c        |  23 +
- .../gcc.target/i386/indirect-thunk-attr-2.c        |  21 +
- .../gcc.target/i386/indirect-thunk-attr-3.c        |  23 +
- .../gcc.target/i386/indirect-thunk-attr-4.c        |  22 +
- .../gcc.target/i386/indirect-thunk-attr-5.c        |  22 +
- .../gcc.target/i386/indirect-thunk-attr-6.c        |  21 +
- .../gcc.target/i386/indirect-thunk-attr-7.c        |  44 ++
- .../gcc.target/i386/indirect-thunk-attr-8.c        |  42 ++
- .../gcc.target/i386/indirect-thunk-bnd-1.c         |  20 +
- .../gcc.target/i386/indirect-thunk-bnd-2.c         |  21 +
- .../gcc.target/i386/indirect-thunk-bnd-3.c         |  19 +
- .../gcc.target/i386/indirect-thunk-bnd-4.c         |  20 +
- .../gcc.target/i386/indirect-thunk-extern-1.c      |  19 +
- .../gcc.target/i386/indirect-thunk-extern-2.c      |  19 +
- .../gcc.target/i386/indirect-thunk-extern-3.c      |  20 +
- .../gcc.target/i386/indirect-thunk-extern-4.c      |  20 +
- .../gcc.target/i386/indirect-thunk-extern-5.c      |  16 +
- .../gcc.target/i386/indirect-thunk-extern-6.c      |  17 +
- .../gcc.target/i386/indirect-thunk-extern-7.c      |  43 ++
- .../gcc.target/i386/indirect-thunk-inline-1.c      |  20 +
- .../gcc.target/i386/indirect-thunk-inline-2.c      |  20 +
- .../gcc.target/i386/indirect-thunk-inline-3.c      |  21 +
- .../gcc.target/i386/indirect-thunk-inline-4.c      |  21 +
- .../gcc.target/i386/indirect-thunk-inline-5.c      |  17 +
- .../gcc.target/i386/indirect-thunk-inline-6.c      |  18 +
- .../gcc.target/i386/indirect-thunk-inline-7.c      |  44 ++
- 41 files changed, 1486 insertions(+), 17 deletions(-)
+ src/gcc/config/i386/i386-opts.h                             |   13 
+ src/gcc/config/i386/i386-protos.h                           |    1 
+ src/gcc/config/i386/i386.c                                  |  621 +++++++++++-
+ src/gcc/config/i386/i386.h                                  |   12 
+ src/gcc/config/i386/i386.md                                 |   26 
+ src/gcc/config/i386/i386.opt                                |   20 
+ src/gcc/doc/extend.texi                                     |   10 
+ src/gcc/doc/invoke.texi                                     |   14 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c        |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c        |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c        |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c        |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c        |   44 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c   |   23 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c   |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c   |   23 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c   |   22 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c   |   22 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c   |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c   |   44 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c   |   42 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c    |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c    |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c |   19 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c |   19 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c |   43 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c |   20 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c |   21 
+ src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c |   44 
+ 33 files changed, 1334 insertions(+), 15 deletions(-)
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
@@ -219,8 +224,8 @@ gcc/testsuite/
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
  create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
 
-diff --git a/gcc/config/i386/i386-opts.h b/src/gcc/config/i386/i386-opts.h
-index b7f92e3be..cc2115287 100644
+Index: b/gcc/config/i386/i386-opts.h
+===================================================================
 --- a/gcc/config/i386/i386-opts.h
 +++ b/gcc/config/i386/i386-opts.h
 @@ -99,4 +99,17 @@ enum stack_protector_guard {
@@ -241,24 +246,24 @@ index b7f92e3be..cc2115287 100644
 +};
 +
  #endif
-diff --git a/gcc/config/i386/i386-protos.h b/src/gcc/config/i386/i386-protos.h
-index ff47bc156..eca4cbf07 100644
+Index: b/gcc/config/i386/i386-protos.h
+===================================================================
 --- a/gcc/config/i386/i386-protos.h
 +++ b/gcc/config/i386/i386-protos.h
-@@ -311,6 +311,7 @@ extern enum attr_cpu ix86_schedule;
+@@ -306,6 +306,7 @@ extern enum attr_cpu ix86_schedule;
  #endif
  
  extern const char * ix86_output_call_insn (rtx_insn *insn, rtx call_op);
 +extern const char * ix86_output_indirect_jmp (rtx call_op, bool ret_p);
- extern bool ix86_operands_ok_for_move_multiple (rtx *operands, bool load,
- 						enum machine_mode mode);
  
-diff --git a/gcc/config/i386/i386.c b/src/gcc/config/i386/i386.c
-index 6c98f7581..0b9fc4d30 100644
+ #ifdef RTX_CODE
+ /* Target data for multipass lookahead scheduling.
+Index: b/gcc/config/i386/i386.c
+===================================================================
 --- a/gcc/config/i386/i386.c
 +++ b/gcc/config/i386/i386.c
-@@ -3662,12 +3662,23 @@ make_pass_stv (gcc::context *ctxt)
-   return new pass_stv (ctxt);
+@@ -2554,12 +2554,23 @@ make_pass_insert_vzeroupper (gcc::contex
+   return new pass_insert_vzeroupper (ctxt);
  }
  
 -/* Return true if a red-zone is in use.  */
@@ -272,7 +277,7 @@ index 6c98f7581..0b9fc4d30 100644
 +   for CALL, in red-zone, we can allow local indirect jumps with
 +   indirect thunk.  */
  
- bool
+ static inline bool
  ix86_using_red_zone (void)
  {
 -  return TARGET_RED_ZONE && !TARGET_64BIT_MS_ABI;
@@ -283,7 +288,7 @@ index 6c98f7581..0b9fc4d30 100644
  }
  
  /* Return a string that documents the current -m options.  The caller is
-@@ -6350,6 +6361,37 @@ ix86_reset_previous_fndecl (void)
+@@ -5126,6 +5137,37 @@ ix86_reset_previous_fndecl (void)
    ix86_previous_fndecl = NULL_TREE;
  }
  
@@ -321,22 +326,20 @@ index 6c98f7581..0b9fc4d30 100644
  /* Establish appropriate back-end context for processing the function
     FNDECL.  The argument might be NULL to indicate processing at top
     level, outside of any function scope.  */
-@@ -6360,7 +6402,13 @@ ix86_set_current_function (tree fndecl)
+@@ -5136,7 +5178,11 @@ ix86_set_current_function (tree fndecl)
       several times in the course of compiling a function, and we don't want to
       slow things down too much or call target_reinit when it isn't safe.  */
    if (fndecl == ix86_previous_fndecl)
 -    return;
 +    {
-+      /* There may be 2 function bodies for the same function FNDECL,
-+	 one is extern inline and one isn't.  */
 +      if (fndecl != NULL_TREE)
-+	ix86_set_indirect_branch_type (fndecl);
++	  ix86_set_indirect_branch_type (fndecl);
 +      return;
 +    }
  
    tree old_tree;
    if (ix86_previous_fndecl == NULL_TREE)
-@@ -6377,6 +6425,8 @@ ix86_set_current_function (tree fndecl)
+@@ -5153,6 +5199,8 @@ ix86_set_current_function (tree fndecl)
        return;
      }
  
@@ -345,7 +348,7 @@ index 6c98f7581..0b9fc4d30 100644
    tree new_tree = DECL_FUNCTION_SPECIFIC_TARGET (fndecl);
    if (new_tree == NULL_TREE)
      new_tree = target_option_default_node;
-@@ -10962,6 +11012,220 @@ ix86_setup_frame_addresses (void)
+@@ -9681,6 +9729,220 @@ ix86_setup_frame_addresses (void)
  # endif
  #endif
  
@@ -566,7 +569,7 @@ index 6c98f7581..0b9fc4d30 100644
  static int pic_labels_used;
  
  /* Fills in the label name that should be used for a pc thunk for
-@@ -10988,11 +11252,32 @@ ix86_code_end (void)
+@@ -9707,11 +9969,32 @@ ix86_code_end (void)
    rtx xops[2];
    int regno;
  
@@ -599,8 +602,8 @@ index 6c98f7581..0b9fc4d30 100644
        if (!(pic_labels_used & (1 << regno)))
  	continue;
  
-@@ -27369,12 +27654,292 @@ ix86_nopic_noplt_attribute_p (rtx call_op)
-   return false;
+@@ -25805,12 +26088,292 @@ ix86_expand_call (rtx retval, rtx fnaddr
+   return call;
  }
  
 +/* Output indirect branch via a call and return thunk.  CALL_OP is a
@@ -892,24 +895,9 @@ index 6c98f7581..0b9fc4d30 100644
    bool seh_nop_p = false;
    const char *xasm;
  
-@@ -27383,7 +27948,13 @@ ix86_output_call_insn (rtx_insn *insn, rtx call_op)
-       if (direct_p)
- 	{
- 	  if (ix86_nopic_noplt_attribute_p (call_op))
--	    xasm = "%!jmp\t{*%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	    {
-+	      direct_p = false;
-+	      if (output_indirect_p)
-+		xasm = "{%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	      else
-+		xasm = "%!jmp\t{*%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	    }
- 	  else
- 	    xasm = "%!jmp\t%P0";
- 	}
-@@ -27392,9 +27963,17 @@ ix86_output_call_insn (rtx_insn *insn, rtx call_op)
+@@ -25823,9 +26386,17 @@ ix86_output_call_insn (rtx_insn *insn, r
        else if (TARGET_SEH)
- 	xasm = "%!rex.W jmp\t%A0";
+ 	xasm = "%!rex.W jmp %A0";
        else
 -	xasm = "%!jmp\t%A0";
 +	{
@@ -927,21 +915,9 @@ index 6c98f7581..0b9fc4d30 100644
        return "";
      }
  
-@@ -27431,14 +28010,28 @@ ix86_output_call_insn (rtx_insn *insn, rtx call_op)
+@@ -25862,9 +26433,17 @@ ix86_output_call_insn (rtx_insn *insn, r
    if (direct_p)
-     {
-       if (ix86_nopic_noplt_attribute_p (call_op))
--	xasm = "%!call\t{*%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	{
-+	  direct_p = false;
-+	  if (output_indirect_p)
-+	    xasm = "{%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	  else
-+	    xasm = "%!call\t{*%p0@GOTPCREL(%%rip)|[QWORD PTR %p0@GOTPCREL[rip]]}";
-+	}
-       else
- 	xasm = "%!call\t%P0";
-     }
+     xasm = "%!call\t%P0";
    else
 -    xasm = "%!call\t%A0";
 +    {
@@ -959,7 +935,7 @@ index 6c98f7581..0b9fc4d30 100644
  
    if (seh_nop_p)
      return "nop";
-@@ -44836,7 +45429,7 @@ ix86_handle_struct_attribute (tree *node, tree name, tree, int,
+@@ -43014,7 +43593,7 @@ ix86_handle_struct_attribute (tree *node
  }
  
  static tree
@@ -968,7 +944,7 @@ index 6c98f7581..0b9fc4d30 100644
  			      bool *no_add_attrs)
  {
    if (TREE_CODE (*node) != FUNCTION_DECL)
-@@ -44845,6 +45438,29 @@ ix86_handle_fndecl_attribute (tree *node, tree name, tree, int,
+@@ -43023,6 +43602,29 @@ ix86_handle_fndecl_attribute (tree *node
                 name);
        *no_add_attrs = true;
      }
@@ -998,7 +974,7 @@ index 6c98f7581..0b9fc4d30 100644
    return NULL_TREE;
  }
  
-@@ -49072,6 +49688,9 @@ static const struct attribute_spec ix86_attribute_table[] =
+@@ -46915,6 +47517,9 @@ static const struct attribute_spec ix86_
      false },
    { "callee_pop_aggregate_return", 1, 1, false, true, true,
      ix86_handle_callee_pop_aggregate_return, true },
@@ -1008,11 +984,30 @@ index 6c98f7581..0b9fc4d30 100644
    /* End element.  */
    { NULL,        0, 0, false, false, false, NULL, false }
  };
-diff --git a/gcc/config/i386/i386.h b/src/gcc/config/i386/i386.h
-index 541441661..9dccdb035 100644
+Index: b/gcc/config/i386/i386.h
+===================================================================
 --- a/gcc/config/i386/i386.h
 +++ b/gcc/config/i386/i386.h
-@@ -2572,6 +2572,13 @@ struct GTY(()) machine_function {
+@@ -1229,6 +1229,9 @@ extern const char *host_detect_local_cpu
+ /* Base register for access to local variables of the function.  */
+ #define FRAME_POINTER_REGNUM 20
+ 
++#define FIRST_INT_REG  AX_REG
++#define LAST_INT_REG  SP_REG
++
+ /* First floating point reg */
+ #define FIRST_FLOAT_REG 8
+ 
+@@ -1465,6 +1468,8 @@ enum reg_class
+    registers.  */
+ #define TARGET_SMALL_REGISTER_CLASSES_FOR_MODE_P hook_bool_mode_true
+ 
++#define LEGACY_INT_REGNO_P(N) (IN_RANGE ((N), FIRST_INT_REG, LAST_INT_REG))
++
+ #define QI_REG_P(X) (REG_P (X) && QI_REGNO_P (REGNO (X)))
+ #define QI_REGNO_P(N) IN_RANGE ((N), AX_REG, BX_REG)
+ 
+@@ -2550,6 +2555,13 @@ struct GTY(()) machine_function {
    /* If true, it is safe to not save/restore DRAP register.  */
    BOOL_BITFIELD no_drap_save_restore : 1;
  
@@ -1023,14 +1018,14 @@ index 541441661..9dccdb035 100644
 +     "indirect_jump" or "tablejump".  */
 +  BOOL_BITFIELD has_local_indirect_jump : 1;
 +
-   /* If true, there is register available for argument passing.  This
-      is used only in ix86_function_ok_for_sibcall by 32-bit to determine
-      if there is scratch register available for indirect sibcall.  In
-diff --git a/gcc/config/i386/i386.md b/src/gcc/config/i386/i386.md
-index d2bfe314f..153e1622b 100644
+   /* During prologue/epilogue generation, the current frame state.
+      Otherwise, the frame state at the end of the prologue.  */
+   struct machine_frame_state fs;
+Index: b/gcc/config/i386/i386.md
+===================================================================
 --- a/gcc/config/i386/i386.md
 +++ b/gcc/config/i386/i386.md
-@@ -11807,13 +11807,18 @@
+@@ -11556,13 +11556,18 @@
  {
    if (TARGET_X32)
      operands[0] = convert_memory_address (word_mode, operands[0]);
@@ -1048,10 +1043,10 @@ index d2bfe314f..153e1622b 100644
 +				 != indirect_branch_keep)")
 +	(const_string "multi")
 +	(const_string "ibr")))
-    (set_attr "length_immediate" "0")
-    (set_attr "maybe_prefix_bnd" "1")])
+    (set_attr "length_immediate" "0")])
  
-@@ -11856,14 +11861,19 @@
+ (define_expand "tablejump"
+@@ -11604,14 +11609,19 @@
  
    if (TARGET_X32)
      operands[0] = convert_memory_address (word_mode, operands[0]);
@@ -1070,10 +1065,10 @@ index d2bfe314f..153e1622b 100644
 +				 != indirect_branch_keep)")
 +	(const_string "multi")
 +	(const_string "ibr")))
-    (set_attr "length_immediate" "0")
-    (set_attr "maybe_prefix_bnd" "1")])
+    (set_attr "length_immediate" "0")])
  
-@@ -12520,8 +12530,12 @@
+ ;; Convert setcc + movzbl to xor + setcc if operands don't overlap.
+@@ -12198,8 +12208,12 @@
    [(simple_return)
     (use (match_operand:SI 0 "register_operand" "r"))]
    "reload_completed"
@@ -1085,17 +1080,17 @@ index d2bfe314f..153e1622b 100644
 +				 != indirect_branch_keep)")
 +	(const_string "multi")
 +	(const_string "ibr")))
-    (set_attr "length_immediate" "0")
-    (set_attr "maybe_prefix_bnd" "1")])
+    (set_attr "length_immediate" "0")])
  
-diff --git a/gcc/config/i386/i386.opt b/src/gcc/config/i386/i386.opt
-index f304b621e..5ffa3349a 100644
+ (define_insn "nop"
+Index: b/gcc/config/i386/i386.opt
+===================================================================
 --- a/gcc/config/i386/i386.opt
 +++ b/gcc/config/i386/i386.opt
-@@ -897,3 +897,23 @@ Enum(stack_protector_guard) String(global) Value(SSP_GLOBAL)
- mmitigate-rop
- Target Var(flag_mitigate_rop) Init(0)
- Attempt to avoid generating instruction sequences containing ret bytes.
+@@ -876,3 +876,23 @@ Enum(stack_protector_guard) String(tls)
+ 
+ EnumValue
+ Enum(stack_protector_guard) String(global) Value(SSP_GLOBAL)
 +
 +mindirect-branch=
 +Target Report RejectNegative Joined Enum(indirect_branch) Var(ix86_indirect_branch) Init(indirect_branch_keep)
@@ -1116,9 +1111,8 @@ index f304b621e..5ffa3349a 100644
 +
 +EnumValue
 +Enum(indirect_branch) String(thunk-extern) Value(indirect_branch_thunk_extern)
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
-new file mode 100644
-index 000000000..d983e1c3e
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
 @@ -0,0 +1,20 @@
@@ -1142,9 +1136,8 @@ index 000000000..d983e1c3e
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
-new file mode 100644
-index 000000000..58f09b42d
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
 @@ -0,0 +1,20 @@
@@ -1168,9 +1161,8 @@ index 000000000..58f09b42d
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
-new file mode 100644
-index 000000000..f20d35c19
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
 @@ -0,0 +1,21 @@
@@ -1195,9 +1187,8 @@ index 000000000..f20d35c19
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
-new file mode 100644
-index 000000000..0eff8fb65
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
 @@ -0,0 +1,21 @@
@@ -1222,56 +1213,8 @@ index 000000000..0eff8fb65
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
-new file mode 100644
-index 000000000..a25b20dd8
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
-@@ -0,0 +1,17 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk" } */
-+
-+extern void bar (void);
-+
-+void
-+foo (void)
-+{
-+  bar ();
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
-new file mode 100644
-index 000000000..cff114a6c
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
-@@ -0,0 +1,18 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk" } */
-+
-+extern void bar (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler-times "jmp\[ \t\]*\.LIND" 2 } } */
-+/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 2 } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
-new file mode 100644
-index 000000000..afdb60079
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
 @@ -0,0 +1,44 @@
@@ -1319,9 +1262,8 @@ index 000000000..afdb60079
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
-new file mode 100644
-index 000000000..d64d978b6
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
 @@ -0,0 +1,23 @@
@@ -1348,9 +1290,8 @@ index 000000000..d64d978b6
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
-new file mode 100644
-index 000000000..93067454d
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
 @@ -0,0 +1,21 @@
@@ -1375,9 +1316,8 @@ index 000000000..93067454d
 +/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
-new file mode 100644
-index 000000000..97744d657
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
 @@ -0,0 +1,23 @@
@@ -1404,9 +1344,8 @@ index 000000000..97744d657
 +/* { dg-final { scan-assembler {\tlfence} } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
-new file mode 100644
-index 000000000..bfce3ea5c
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
 @@ -0,0 +1,22 @@
@@ -1432,9 +1371,8 @@ index 000000000..bfce3ea5c
 +/* { dg-final { scan-assembler {\tlfence} } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
-new file mode 100644
-index 000000000..083360604
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
 @@ -0,0 +1,22 @@
@@ -1460,9 +1398,8 @@ index 000000000..083360604
 +/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
 +/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target x32 } } } */
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
-new file mode 100644
-index 000000000..2eba0fbd9
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
 @@ -0,0 +1,21 @@
@@ -1487,9 +1424,8 @@ index 000000000..2eba0fbd9
 +/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
 +/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target x32 } } } */
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
-new file mode 100644
-index 000000000..f58427eae
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
 @@ -0,0 +1,44 @@
@@ -1537,9 +1473,8 @@ index 000000000..f58427eae
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c
-new file mode 100644
-index 000000000..564ed3954
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c
 @@ -0,0 +1,42 @@
@@ -1585,9 +1520,8 @@ index 000000000..564ed3954
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
-new file mode 100644
-index 000000000..50fbee20a
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
 @@ -0,0 +1,20 @@
@@ -1611,9 +1545,8 @@ index 000000000..50fbee20a
 +/* { dg-final { scan-assembler "bnd ret" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
-new file mode 100644
-index 000000000..2976e67ad
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
 @@ -0,0 +1,21 @@
@@ -1638,60 +1571,8 @@ index 000000000..2976e67ad
 +/* { dg-final { scan-assembler "bnd ret" } } */
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
-new file mode 100644
-index 000000000..da4bc98ef
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
-@@ -0,0 +1,19 @@
-+/* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
-+/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+
-+void bar (char *);
-+char buf[10];
-+
-+void
-+foo (void)
-+{
-+  bar (buf);
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "bnd jmp\[ \t\]*__x86_indirect_thunk_bnd" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "bnd call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "bnd ret" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
-new file mode 100644
-index 000000000..c64d12ef9
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
-@@ -0,0 +1,20 @@
-+/* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
-+/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+
-+void bar (char *);
-+char buf[10];
-+
-+int
-+foo (void)
-+{
-+  bar (buf);
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "bnd jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler "bnd jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-times "bnd call\[ \t\]*\.LIND" 2 } } */
-+/* { dg-final { scan-assembler "bnd ret" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler {\tlfence} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
-new file mode 100644
-index 000000000..49f27b494
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
 @@ -0,0 +1,19 @@
@@ -1714,9 +1595,8 @@ index 000000000..49f27b494
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
-new file mode 100644
-index 000000000..a1e3eb6fc
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
 @@ -0,0 +1,19 @@
@@ -1739,9 +1619,8 @@ index 000000000..a1e3eb6fc
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
-new file mode 100644
-index 000000000..395634e7e
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
 @@ -0,0 +1,20 @@
@@ -1765,9 +1644,8 @@ index 000000000..395634e7e
 +/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 1 { target { ! x32 } } } } */
 +/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target x32 } } } */
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
-new file mode 100644
-index 000000000..fd3f63379
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
 @@ -0,0 +1,20 @@
@@ -1791,54 +1669,8 @@ index 000000000..fd3f63379
 +/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 1 { target { ! x32 } } } } */
 +/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target x32 } } } */
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
-new file mode 100644
-index 000000000..ba2f92b6f
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
-@@ -0,0 +1,16 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+
-+extern void bar (void);
-+
-+void
-+foo (void)
-+{
-+  bar ();
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
-new file mode 100644
-index 000000000..0c5a2d472
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
-@@ -0,0 +1,17 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+
-+extern void bar (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler-times "jmp\[ \t\]*\.LIND" 1 } } */
-+/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 1 } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
-new file mode 100644
-index 000000000..665252327
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
 @@ -0,0 +1,43 @@
@@ -1885,9 +1717,8 @@ index 000000000..665252327
 +/* { dg-final { scan-assembler-not {\t(lfence|pause)} } } */
 +/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
 +/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
-new file mode 100644
-index 000000000..68c0ff713
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
 @@ -0,0 +1,20 @@
@@ -1911,9 +1742,8 @@ index 000000000..68c0ff713
 +/* { dg-final { scan-assembler {\tlfence} } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
-new file mode 100644
-index 000000000..e2da1fcb6
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
 @@ -0,0 +1,20 @@
@@ -1937,9 +1767,8 @@ index 000000000..e2da1fcb6
 +/* { dg-final { scan-assembler {\tlfence} } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
-new file mode 100644
-index 000000000..244fec708
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
 @@ -0,0 +1,21 @@
@@ -1964,9 +1793,8 @@ index 000000000..244fec708
 +/* { dg-final { scan-assembler-times {\tlfence} 1 } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
-new file mode 100644
-index 000000000..107ebe32f
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
 @@ -0,0 +1,21 @@
@@ -1991,56 +1819,8 @@ index 000000000..107ebe32f
 +/* { dg-final { scan-assembler-times {\tlfence} 1 } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
 +/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
-new file mode 100644
-index 000000000..17b04ef22
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
-@@ -0,0 +1,17 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+
-+extern void bar (void);
-+
-+void
-+foo (void)
-+{
-+  bar ();
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler {\tlfence} } } */
-+/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
-new file mode 100644
-index 000000000..d9eb11285
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
-@@ -0,0 +1,18 @@
-+/* { dg-do compile { target *-*-linux* } } */
-+/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+
-+extern void bar (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*bar@GOT" } } */
-+/* { dg-final { scan-assembler-times "jmp\[ \t\]*\.LIND" 2 } } */
-+/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 2 } } */
-+/* { dg-final { scan-assembler-times {\tpause} 1 } } */
-+/* { dg-final { scan-assembler-times {\tlfence} 1 } } */
-+/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c b/src/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
-new file mode 100644
-index 000000000..d02b1dcb1
+Index: b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
+===================================================================
 --- /dev/null
 +++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
 @@ -0,0 +1,44 @@
@@ -2088,6 +1868,3 @@ index 000000000..d02b1dcb1
 +/* { dg-final { scan-assembler {\tpause} } } */
 +/* { dg-final { scan-assembler {\tlfence} } } */
 +/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
--- 
-2.16.1
-
