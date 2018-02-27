@@ -2,6 +2,8 @@
 %define _sourcedir %(pwd)
 %endif
 
+%global _smp_ncpus_max 1
+
 %global DATE 20170727
 %global SVNREV 250613
 %global gcc_version 6.4.1
