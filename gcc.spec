@@ -93,6 +93,7 @@ Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
 Release: %{gcc_release}.qubes1%{?dist}
+%global release_non_qubes %{gcc_release}%{?dist}
 # libgcc, libgfortran, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
 License: GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2+ and BSD
@@ -188,7 +189,7 @@ Requires: glibc >= 2.3.90-35
 Requires: glibc >= 2.16
 %endif
 %endif
-Requires: libgcc >= %{version}-%{release}
+Requires: libgcc >= %{version}-%{release_non_qubes}
 Requires: libgomp = %{version}-%{release}
 %if !%{build_ada}
 Obsoletes: gcc-gnat < %{version}-%{release}
@@ -245,24 +246,6 @@ Patch108: Use-INVALID_REGNUM-in-indirect-thunk-processing.patch
 %description
 The gcc package contains the GNU Compiler Collection version 6.
 You'll need this package in order to compile C code.
-
-%package -n libgcc
-Summary: GCC version 6 shared support library
-Group: System Environment/Libraries
-Autoreq: false
-%if !%{build_ada}
-Obsoletes: libgnat < %{version}-%{release}
-%endif
-Obsoletes: libmudflap
-Obsoletes: libmudflap-devel
-Obsoletes: libmudflap-static
-Obsoletes: libgcj < %{version}-%{release}
-Obsoletes: libgcj-devel < %{version}-%{release}
-Obsoletes: libgcj-src < %{version}-%{release}
-
-%description -n libgcc
-This package contains GCC shared support library which is needed
-e.g. for exception handling support.
 
 %package c++
 Summary: C++ support for GCC
@@ -2028,29 +2011,6 @@ if [ $1 = 0 ]; then
   %{_sbindir}/update-alternatives --remove go %{_prefix}/bin/go.gcc
 fi
 
-# Because glibc Prereq's libgcc and /sbin/ldconfig
-# comes from glibc, it might not exist yet when
-# libgcc is installed
-%post -n libgcc -p <lua>
-if posix.access ("/sbin/ldconfig", "x") then
-  local pid = posix.fork ()
-  if pid == 0 then
-    posix.exec ("/sbin/ldconfig")
-  elseif pid ~= -1 then
-    posix.wait (pid)
-  end
-end
-
-%postun -n libgcc -p <lua>
-if posix.access ("/sbin/ldconfig", "x") then
-  local pid = posix.fork ()
-  if pid == 0 then
-    posix.exec ("/sbin/ldconfig")
-  elseif pid ~= -1 then
-    posix.wait (pid)
-  end
-end
-
 %post -n libstdc++ -p /sbin/ldconfig
 
 %postun -n libstdc++ -p /sbin/ldconfig
@@ -2496,12 +2456,6 @@ fi
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}
 %dir %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_version}
 %{_prefix}/libexec/gcc/%{gcc_target_platform}/%{gcc_version}/cc1
-
-%files -n libgcc
-/%{_lib}/libgcc_s-%{gcc_version}-%{DATE}.so.1
-/%{_lib}/libgcc_s.so.1
-%{!?_licensedir:%global license %%doc}
-%license gcc/COPYING* COPYING.RUNTIME
 
 %files c++
 %{_prefix}/bin/%{gcc_target_platform}-*++
