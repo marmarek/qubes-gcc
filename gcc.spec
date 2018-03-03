@@ -92,7 +92,7 @@
 Summary: Various compilers (C, C++, Objective-C, Java, ...)
 Name: gcc
 Version: %{gcc_version}
-Release: %{gcc_release}.qubes1%{?dist}
+Release: %{gcc_release}.qubes2%{?dist}
 %global release_non_qubes %{gcc_release}%{?dist}
 # libgcc, libgfortran, libgomp, libstdc++ and crtstuff have
 # GCC Runtime Exception.
